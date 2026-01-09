@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Controller
@@ -67,23 +66,21 @@ public class CreditUiController {
 		model.addAttribute("monthlyNetIncome", monthlyNetIncome);
 		model.addAttribute("propertyValue", propertyValue);
 		model.addAttribute("equity", equity);
-		List<Offer> offers;
 
 		try {
 			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity);
-			offers = response.getOffers();
+
+			List<Offer> offers = response.getOffers();
+			model.addAttribute("offers", offers);
 			model.addAttribute("processInstanceId", response.getProcessInstanceId());
 		} catch (Exception e) {
-			// Fallback demo offers if the BPMN doesn't provide creditOffers yet.
-			offers = demoOffers(monthlyNetIncome, propertyValue, equity);
+
 			model.addAttribute("statusType", "danger");
 			model.addAttribute("statusTitle", "Info");
 			model.addAttribute("statusMessage",
-					"Could not read creditOffers from process. Showing demo offers. (" + e.getMessage() + ")");
+					"Could not read creditOffers from process. " + e.getMessage() + "");
 			log.error(e.getMessage(), e);
 		}
-
-		model.addAttribute("offers", offers);
 		return "credit";
 	}
 
@@ -131,27 +128,6 @@ public class CreditUiController {
 		model.addAttribute("showSign", false);
 
 		return "credit";
-	}
-
-	private List<Offer> demoOffers(BigDecimal income, BigDecimal value, BigDecimal equity) {
-		// Simple deterministic demo calculation
-		BigDecimal base = new BigDecimal("3.20");
-		BigDecimal equityRatio = equity.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(BigDecimal.ZERO) > 0
-				? equity.divide(value, 6, RoundingMode.HALF_UP)
-				: BigDecimal.ZERO;
-
-		BigDecimal discount = equityRatio.multiply(new BigDecimal("1.20")); // up to ~1.2% discount if equityRatio=1.0
-		BigDecimal incomeBonus = income.compareTo(new BigDecimal("4000")) >= 0 ? new BigDecimal("0.20") : BigDecimal.ZERO;
-
-		BigDecimal a = base.subtract(discount).subtract(incomeBonus).max(new BigDecimal("1.10"));
-		BigDecimal b = a.add(new BigDecimal("0.35"));
-		BigDecimal c = a.add(new BigDecimal("0.60"));
-
-		return List.of(
-				new Offer("Bank A", a.setScale(2, RoundingMode.HALF_UP)),
-				new Offer("Bank B", b.setScale(2, RoundingMode.HALF_UP)),
-				new Offer("Bank C", c.setScale(2, RoundingMode.HALF_UP))
-		);
 	}
 
 }
