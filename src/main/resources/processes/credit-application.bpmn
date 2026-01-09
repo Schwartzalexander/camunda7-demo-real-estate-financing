@@ -7,8 +7,8 @@
     <bpmn:endEvent id="EndEvent_ContractConcluded" name="Credit contract concluded">
       <bpmn:incoming>Flow_1jptx6s</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_application_not_accepted" name="No" sourceRef="Gateway_ApplicationReview" targetRef="EndEvent_ContractCancelled">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${application_accepted != true}
+    <bpmn:sequenceFlow id="Flow_ApplicationNotAccepted" name="No" sourceRef="Gateway_ApplicationReview" targetRef="EndEvent_ContractCancelled">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationAccepted != true}
 			</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:callActivity id="Call_Credit_Comparison" name="Credit comparison" calledElement="Call_Credit_Comparison">
@@ -35,21 +35,19 @@
     <bpmn:sequenceFlow id="Flow_194lp6r" sourceRef="Task_BankSelection" targetRef="Task_SubmitApplication" />
     <bpmn:exclusiveGateway id="Gateway_ApplicationReview" name="Bank accepts application">
       <bpmn:incoming>Flow_1537eeg</bpmn:incoming>
-      <bpmn:outgoing>Flow_application_accepted</bpmn:outgoing>
-      <bpmn:outgoing>Flow_application_not_accepted</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ApplicationNotAccepted</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_1537eeg" sourceRef="Task_ReviewLoanApplication" targetRef="Gateway_ApplicationReview" />
-    <bpmn:serviceTask id="Task_ReviewLoanApplication" name="Bank reviews loan application" camunda:delegateExpression="${reviewLoanApplicationDelegate}">
+    <bpmn:sequenceFlow id="Flow_1537eeg" sourceRef="Task_ReviewCreditApplication" targetRef="Gateway_ApplicationReview" />
+    <bpmn:serviceTask id="Task_ReviewCreditApplication" name="Bank reviews credit application" camunda:delegateExpression="${reviewCreditApplicationDelegate}">
       <bpmn:incoming>Flow_1bqavv7</bpmn:incoming>
       <bpmn:outgoing>Flow_1537eeg</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1bqavv7" sourceRef="Task_SubmitApplication" targetRef="Task_ReviewLoanApplication" />
+    <bpmn:sequenceFlow id="Flow_1bqavv7" sourceRef="Task_SubmitApplication" targetRef="Task_ReviewCreditApplication" />
     <bpmn:serviceTask id="Task_SendContract" name="Bank sends signed contract" camunda:delegateExpression="${sendContractDelegate}">
-      <bpmn:incoming>Flow_application_accepted</bpmn:incoming>
       <bpmn:outgoing>Flow_0bwcnok</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_application_accepted" name="Yes" sourceRef="Gateway_ApplicationReview" targetRef="Task_SendContract">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${application_accepted == true}
+    <bpmn:sequenceFlow id="Flow_ApplicationAccepted" name="Yes" sourceRef="Gateway_ApplicationReview" targetRef="Task_SendContract">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationAccepted == true}
 			</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:userTask id="Task_SignContract" name="User signs contract">
@@ -59,7 +57,7 @@
     <bpmn:sequenceFlow id="Flow_0bwcnok" sourceRef="Task_SendContract" targetRef="Task_SignContract" />
     <bpmn:sequenceFlow id="Flow_1jptx6s" sourceRef="Task_SignContract" targetRef="EndEvent_ContractConcluded" />
     <bpmn:endEvent id="EndEvent_ContractCancelled" name="Credit contract cancelled">
-      <bpmn:incoming>Flow_application_not_accepted</bpmn:incoming>
+      <bpmn:incoming>Flow_ApplicationNotAccepted</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:userTask id="Task_EnterCreditParameters" name="User enters credit parameters">
       <bpmn:incoming>Flow_1ta8xbz</bpmn:incoming>
@@ -85,6 +83,10 @@
         <dc:Bounds x="430" y="150" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xkgrst_di" bpmnElement="Task_BankSelection">
+        <dc:Bounds x="590" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ijl0px_di" bpmnElement="Task_SubmitApplication">
         <dc:Bounds x="750" y="150" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -95,7 +97,7 @@
           <dc:Bounds x="1057" y="222" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_04zqdx5_di" bpmnElement="Task_ReviewLoanApplication">
+      <bpmndi:BPMNShape id="Activity_04zqdx5_di" bpmnElement="Task_ReviewCreditApplication">
         <dc:Bounds x="910" y="150" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -117,11 +119,7 @@
         <dc:Bounds x="270" y="150" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0xkgrst_di" bpmnElement="Task_BankSelection">
-        <dc:Bounds x="590" y="150" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Flow_TurnLoop_To_End" bpmnElement="Flow_application_not_accepted">
+      <bpmndi:BPMNEdge id="Edge_Flow_TurnLoop_To_End" bpmnElement="Flow_ApplicationNotAccepted">
         <di:waypoint x="1090" y="165" />
         <di:waypoint x="1090" y="102" />
         <di:waypoint x="1500" y="102" />
@@ -149,7 +147,7 @@
         <di:waypoint x="850" y="190" />
         <di:waypoint x="910" y="190" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1cj2rlr_di" bpmnElement="Flow_application_accepted">
+      <bpmndi:BPMNEdge id="Flow_1cj2rlr_di" bpmnElement="Flow_ApplicationAccepted">
         <di:waypoint x="1115" y="190" />
         <di:waypoint x="1170" y="190" />
         <bpmndi:BPMNLabel>

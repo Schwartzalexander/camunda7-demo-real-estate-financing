@@ -61,7 +61,7 @@
 
                     <form th:action="@{/credit/select}" method="post" class="offer-actions">
                         <input type="hidden" name="bankName" th:value="${offer.bankName}"/>
-
+                        <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
                         <input type="hidden" name="monthlyNetIncome" th:value="${monthlyNetIncome}"/>
                         <input type="hidden" name="propertyValue" th:value="${propertyValue}"/>
                         <input type="hidden" name="equity" th:value="${equity}"/>
@@ -79,13 +79,35 @@
             </div>
         </section>
 
-        <section class="sign" th:if="${showSign == true}">
-            <form th:action="@{/credit/sign}" method="post">
-                <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
-                <button class="btn primary" type="submit">Sign</button>
-            </form>
-            <p class="hint">Signing completes the process.</p>
+        <!-- Decision result after /select -->
+        <section class="decision" th:if="${applicationAccepted != null}">
+            <!-- applicationAccepted -->
+            <div class="status-box success" th:if="${applicationAccepted == true}">
+                <span class="status-title">Approved</span>
+                <p class="status-text">
+                    Contract number:
+                    <strong th:text="${contractNumber}">BANK-123-ABC</strong>
+                </p>
+
+                <form th:action="@{/credit/sign}" method="post" class="actions">
+                    <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
+                    <input type="hidden" name="contractNumber" th:value="${contractNumber}"/>
+                    <button class="btn primary" type="submit">Sign</button>
+                </form>
+
+                <p class="hint">Signing completes the process.</p>
+            </div>
+
+            <!-- Rejected -->
+            <div class="status-box danger" th:if="${applicationAccepted == false}">
+                <span class="status-title">Rejected</span>
+                <p class="status-text" th:text="${rejectionReason}">
+                    Reason
+                </p>
+                <p class="hint">The process is finished.</p>
+            </div>
         </section>
+
 
     </main>
 

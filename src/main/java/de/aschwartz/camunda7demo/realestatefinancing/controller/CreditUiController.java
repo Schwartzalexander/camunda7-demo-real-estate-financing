@@ -1,14 +1,15 @@
 package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSelectBank;
 import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterCreditParameters;
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSubmitApplication;
 import de.aschwartz.camunda7demo.realestatefinancing.model.EnterCreditParametersResponse;
 import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
+import de.aschwartz.camunda7demo.realestatefinancing.model.SelectBankResponse;
+import de.aschwartz.camunda7demo.realestatefinancing.model.SubmitApplicationResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.task.Task;
-import org.camunda.bpm.engine.variable.Variables;
-import org.camunda.bpm.engine.variable.value.TypedValue;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,37 +20,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/credit")
 @Slf4j
 public class CreditUiController {
 
-	/**
-	 * BPMN process keys (must match your BPMN process ids/keys).
-	 * - Main process: RealEstateCreditApplication
-	 * - Comparison process: CreditComparisonProcess (please set this in your comparison BPMN)
-	 */
-	private static final String PROC_MAIN = "RealEstateCreditApplication";
-	private static final String PROC_COMPARE = "CreditComparisonProcess";
-
 	// Task definition keys in your main process (must match BPMN ids)
-	private static final String TASK_ENTER_PARAMS = "Task_EnterCreditParameters";
-	private static final String TASK_BANK_SELECTION = "Task_BankSelection";
-	private static final String TASK_SUBMIT = "Task_SubmitApplication";
 	private static final String TASK_SIGN = "Task_SignContract";
 
-	private final RuntimeService runtimeService;
 	private final TaskService taskService;
 	private final UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters;
+	private final UserTaskSelectBank userTaskSelectBank;
+	private final UserTaskSubmitApplication userTaskSubmitApplication;
 
-	public CreditUiController(RuntimeService runtimeService, TaskService taskService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters) {
-		this.runtimeService = runtimeService;
+	public CreditUiController(
+			TaskService taskService,
+			UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
+			UserTaskSelectBank userTaskSelectBank,
+			UserTaskSubmitApplication userTaskSubmitApplication) {
 		this.taskService = taskService;
 		this.userTaskServiceEnterCreditParameters = userTaskServiceEnterCreditParameters;
+		this.userTaskSelectBank = userTaskSelectBank;
+		this.userTaskSubmitApplication = userTaskSubmitApplication;
 	}
 
 	@GetMapping
@@ -97,45 +90,19 @@ public class CreditUiController {
 	@PostMapping("/select")
 	public String selectBankAndSubmit(
 			@RequestParam String bankName,
-			@RequestParam BigDecimal monthlyNetIncome,
-			@RequestParam BigDecimal propertyValue,
-			@RequestParam BigDecimal equity,
+			@RequestParam String processInstanceId,
 			Model model
 	) {
-		model.addAttribute("monthlyNetIncome", monthlyNetIncome);
-		model.addAttribute("propertyValue", propertyValue);
-		model.addAttribute("equity", equity);
-
-		// Start main process (will likely stop at first user task)
-		var vars = Variables.createVariables()
-				.putValue("monthlyNetIncome", monthlyNetIncome)
-				.putValue("propertyValue", propertyValue)
-				.putValue("equity", equity)
-				.putValue("selectedBank", bankName);
-
-		String processInstanceId = runtimeService.startProcessInstanceByKey(PROC_MAIN, vars).getProcessInstanceId();
-
-		// Drive the process forward until it either:
-		// - ends (declined path)
-		// - reaches Task_SignContract (accepted path)
-		boolean accepted = driveMainProcessToSignOrEnd(processInstanceId, bankName, vars);
+		SelectBankResponse selectBankResponse = userTaskSelectBank.selectBank(bankName, processInstanceId);
+		SubmitApplicationResponse submitApplicationResponse = userTaskSubmitApplication.submitApplication(processInstanceId);
 
 		model.addAttribute("processInstanceId", processInstanceId);
-
-		if (!accepted) {
-			model.addAttribute("statusType", "danger");
-			model.addAttribute("statusTitle", "Declined");
-			model.addAttribute("statusMessage", "The bank declined your credit application.");
-			model.addAttribute("showSign", false);
-		} else {
-			model.addAttribute("statusType", "success");
-			model.addAttribute("statusTitle", "Accepted");
-			model.addAttribute("statusMessage", "The bank accepted your credit application.");
-			model.addAttribute("showSign", true);
-		}
-
-		// Keep showing offers area? Optional:
-		model.addAttribute("offers", demoOffers(monthlyNetIncome, propertyValue, equity));
+		model.addAttribute("monthlyNetIncome", selectBankResponse.getMonthlyNetIncome());
+		model.addAttribute("propertyValue", selectBankResponse.getPropertyValue());
+		model.addAttribute("equity", selectBankResponse.getEquity());
+		model.addAttribute("applicationAccepted", submitApplicationResponse.getAccepted());
+		model.addAttribute("contractNumber", submitApplicationResponse.getContractNumber());
+		model.addAttribute("rejectionReason", submitApplicationResponse.getRejectionReason());
 
 		return "credit";
 	}
@@ -164,92 +131,6 @@ public class CreditUiController {
 		model.addAttribute("showSign", false);
 
 		return "credit";
-	}
-
-	/**
-	 * Completes the user tasks automatically up to either SignContract (wait state) or process end.
-	 * In a real system, you'd model more tasks as service tasks / delegates, not in the controller.
-	 */
-	private boolean driveMainProcessToSignOrEnd(String processInstanceId, String bankName, org.camunda.bpm.engine.variable.VariableMap vars) {
-		// 1) Complete Task_EnterCreditParameters
-		completeIfPresent(processInstanceId, TASK_ENTER_PARAMS, vars);
-
-		// 2) Complete Task_BankSelection with chosen bank
-		var bankVars = Variables.createVariables().putValue("selectedBank", bankName);
-		completeIfPresent(processInstanceId, TASK_BANK_SELECTION, bankVars);
-
-		// 3) Complete Task_SubmitApplication
-		completeIfPresent(processInstanceId, TASK_SUBMIT, Variables.createVariables());
-
-		// At this point service task "Bank reviews loan application" runs.
-		// If your BPMN service task does NOT set application_accepted, we set it here as a demo fallback.
-		// Adjust or remove this once your JavaDelegate does it.
-		boolean accepted = decideAcceptance(bankName);
-		runtimeService.setVariable(processInstanceId, "application_accepted", accepted);
-
-		// Now either:
-		// - process ends (declined), no tasks
-		// - reaches Task_SignContract (accepted), one task waiting
-		Task signTask = taskService.createTaskQuery()
-				.processInstanceId(processInstanceId)
-				.taskDefinitionKey(TASK_SIGN)
-				.singleResult();
-
-		// If sign exists => accepted
-		if (signTask != null) return true;
-
-		// else maybe process already ended or is stuck somewhere unexpected
-		return false;
-	}
-
-	private void completeIfPresent(String processInstanceId, String taskDefinitionKey, org.camunda.bpm.engine.variable.VariableMap variables) {
-		Task task = taskService.createTaskQuery()
-				.processInstanceId(processInstanceId)
-				.taskDefinitionKey(taskDefinitionKey)
-				.singleResult();
-		if (task != null) {
-			taskService.complete(task.getId(), variables);
-		}
-	}
-
-	private boolean decideAcceptance(String bankName) {
-		// Demo rule: Bank A accepts, others decline. Replace with your real bank logic.
-		return "Bank A".equalsIgnoreCase(bankName) || "A".equalsIgnoreCase(bankName);
-	}
-
-	/**
-	 * Converts the process variable creditOffers into Offer list.
-	 * You can switch this depending on how you store offers (Spin JSON, List<Map>, etc.).
-	 */
-	@SuppressWarnings("unchecked")
-	private List<Offer> toOffers(TypedValue typedValue) {
-		if (typedValue == null || typedValue.getValue() == null) return List.of();
-
-		Object v = typedValue.getValue();
-
-		// Common simple case: List<Map<String,Object>>
-		if (v instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof Map) {
-			return ((List<Map<String, Object>>) v).stream()
-					.map(m -> new Offer(
-							Objects.toString(m.getOrDefault("bankName", "Unknown")),
-							toBigDecimal(m.get("interestRate"))
-					))
-					.collect(Collectors.toList());
-		}
-
-		// If you store another format, adapt here.
-		return List.of();
-	}
-
-	private BigDecimal toBigDecimal(Object o) {
-		if (o == null) return BigDecimal.ZERO;
-		if (o instanceof BigDecimal bd) return bd;
-		if (o instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
-		try {
-			return new BigDecimal(o.toString());
-		} catch (Exception e) {
-			return BigDecimal.ZERO;
-		}
 	}
 
 	private List<Offer> demoOffers(BigDecimal income, BigDecimal value, BigDecimal equity) {
