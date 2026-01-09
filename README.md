@@ -13,7 +13,7 @@ mvn -U clean spring-boot:run
 
 ## Usage
 
-1. Open the UI at http://localhost:8080/.
+1. Open the UI at http://localhost:8080/credit.
 
 ## Additional tools
 

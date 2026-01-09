@@ -1,8 +1,11 @@
-package de.aschwartz.camunda7demo.realestatefinancing;
+package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterCreditParameters;
+import de.aschwartz.camunda7demo.realestatefinancing.model.EnterCreditParametersResponse;
+import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
+import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
-import org.camunda.bpm.engine.runtime.ProcessInstanceWithVariables;
 import org.camunda.bpm.engine.task.Task;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.engine.variable.value.TypedValue;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/credit")
+@Slf4j
 public class CreditUiController {
 
 	/**
@@ -40,18 +44,23 @@ public class CreditUiController {
 
 	private final RuntimeService runtimeService;
 	private final TaskService taskService;
+	private final UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters;
 
-	public CreditUiController(RuntimeService runtimeService, TaskService taskService) {
+	public CreditUiController(RuntimeService runtimeService, TaskService taskService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters) {
 		this.runtimeService = runtimeService;
 		this.taskService = taskService;
+		this.userTaskServiceEnterCreditParameters = userTaskServiceEnterCreditParameters;
 	}
 
 	@GetMapping
 	public String page(Model model) {
 		// Defaults (optional)
-		model.addAttribute("monthlyNetIncome", model.getAttribute("monthlyNetIncome"));
-		model.addAttribute("propertyValue", model.getAttribute("propertyValue"));
-		model.addAttribute("equity", model.getAttribute("equity"));
+		Object monthlyNetIncome = model.getAttribute("monthlyNetIncome");
+		model.addAttribute("monthlyNetIncome", monthlyNetIncome != null ? monthlyNetIncome : "2500");
+		Object propertyValue = model.getAttribute("propertyValue");
+		model.addAttribute("propertyValue", propertyValue != null ? propertyValue : "100000");
+		Object equity = model.getAttribute("equity");
+		model.addAttribute("equity", equity != null ? equity : "10000");
 		return "credit";
 	}
 
@@ -65,29 +74,20 @@ public class CreditUiController {
 		model.addAttribute("monthlyNetIncome", monthlyNetIncome);
 		model.addAttribute("propertyValue", propertyValue);
 		model.addAttribute("equity", equity);
-
-		// Start comparison synchronously (works if the process has no wait states).
-		// If your comparison process includes wait states, executeWithVariablesInReturn will return earlier.
 		List<Offer> offers;
-		try {
-			ProcessInstanceWithVariables pi = runtimeService
-					.createProcessInstanceByKey(PROC_COMPARE)
-					.setVariable("monthlyNetIncome", monthlyNetIncome)
-					.setVariable("propertyValue", propertyValue)
-					.setVariable("equity", equity)
-					.executeWithVariablesInReturn();
 
-			// Expecting a variable "creditOffers" (per your call activity out mapping).
-			// If your process sets it differently, adjust here.
-			TypedValue tv = pi.getVariables().getValueTyped("creditOffers");
-			offers = toOffers(tv);
+		try {
+			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity);
+			offers = response.getOffers();
+			model.addAttribute("processInstanceId", response.getProcessInstanceId());
 		} catch (Exception e) {
 			// Fallback demo offers if the BPMN doesn't provide creditOffers yet.
 			offers = demoOffers(monthlyNetIncome, propertyValue, equity);
 			model.addAttribute("statusType", "danger");
 			model.addAttribute("statusTitle", "Info");
 			model.addAttribute("statusMessage",
-					"Could not read creditOffers from process. Showing demo offers. (" + e.getClass().getSimpleName() + ")");
+					"Could not read creditOffers from process. Showing demo offers. (" + e.getMessage() + ")");
+			log.error(e.getMessage(), e);
 		}
 
 		model.addAttribute("offers", offers);
@@ -273,6 +273,4 @@ public class CreditUiController {
 		);
 	}
 
-	public record Offer(String bankName, BigDecimal interestRate) {
-	}
 }
