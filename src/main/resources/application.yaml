@@ -21,3 +21,10 @@ camunda:
     generic-properties:
       properties:
         historyTimeToLive: P7D
+
+camunda7demo:
+  pdf-path: 'C:\pdf'
+  auto-credit:
+    base-url: ''
+    apiPath: ''
+

@@ -2,6 +2,8 @@
 .idea/
 *.iml
 
+/pdf
+
 # Gradle
 .gradle/
 build/
@@ -40,3 +42,5 @@ Thumbs.db
 !gradle/wrapper/gradle-wrapper.properties
 
 tmp/
+
+additional-properties.yaml

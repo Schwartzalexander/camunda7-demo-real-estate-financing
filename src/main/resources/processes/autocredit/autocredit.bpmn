@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_MaDn_Game" targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler" exporterVersion="5.42.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_MaDn_Game" targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler" exporterVersion="5.42.0">
   <bpmn:process id="RealEstateAutoCredit" name="Real estate auto credit" isExecutable="true">
     <bpmn:startEvent id="StartEvent_CreditApplication" name="User starts credit application">
       <bpmn:outgoing>Flow_1ta8xbz</bpmn:outgoing>
@@ -12,16 +12,19 @@
       <bpmn:outgoing>Flow_1pqrgwi</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_1ta8xbz" sourceRef="StartEvent_CreditApplication" targetRef="Task_EnterAutoCreditParameters" />
-    <bpmn:sequenceFlow id="Flow_1pqrgwi" sourceRef="Task_EnterAutoCreditParameters" targetRef="Activity_GetCheapestOfferFromVergleichDe" />
-    <bpmn:serviceTask id="Activity_GetCheapestOfferFromVergleichDe" name="Get cheapest offer from vergleich.de" camunda:delegateExpression="${getCheapestOfferFromVergleichDe}">
+    <bpmn:sequenceFlow id="Flow_1pqrgwi" sourceRef="Task_EnterAutoCreditParameters" targetRef="Activity_GetCheapestOffer" />
+    <bpmn:serviceTask id="Activity_GetCheapestOffer" name="Get cheapest offer" camunda:asyncBefore="true" camunda:delegateExpression="${getCheapestOfferDelegate}">
+      <bpmn:extensionElements>
+        <camunda:failedJobRetryTimeCycle>R3/PT1S</camunda:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1pqrgwi</bpmn:incoming>
       <bpmn:outgoing>Flow_14ul2yb</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_CreateContractPDF" name="Create contract PDF" camunda:delegateExpression="createContractPDF">
+    <bpmn:serviceTask id="Activity_CreateContractPDF" name="Create contract PDF" camunda:delegateExpression="${createContractPdfDelegate}">
       <bpmn:incoming>Flow_14ul2yb</bpmn:incoming>
       <bpmn:outgoing>Flow_18r9xvh</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_14ul2yb" sourceRef="Activity_GetCheapestOfferFromVergleichDe" targetRef="Activity_CreateContractPDF" />
+    <bpmn:sequenceFlow id="Flow_14ul2yb" sourceRef="Activity_GetCheapestOffer" targetRef="Activity_CreateContractPDF" />
     <bpmn:sequenceFlow id="Flow_18r9xvh" sourceRef="Activity_CreateContractPDF" targetRef="EndEvent_ContractConcluded" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Game">
@@ -42,7 +45,7 @@
         <dc:Bounds x="270" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_05e0zhp_di" bpmnElement="Activity_GetCheapestOfferFromVergleichDe">
+      <bpmndi:BPMNShape id="Activity_05e0zhp_di" bpmnElement="Activity_GetCheapestOffer">
         <dc:Bounds x="430" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
