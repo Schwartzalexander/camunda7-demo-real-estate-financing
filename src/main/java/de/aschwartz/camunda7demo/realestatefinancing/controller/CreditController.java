@@ -23,7 +23,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/credit")
 @Slf4j
-public class CreditUiController {
+public class CreditController {
 
 	private final CreateProcessService createProcessService;
 	private final UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters;
@@ -31,7 +31,7 @@ public class CreditUiController {
 	private final UserTaskSubmitApplication userTaskSubmitApplication;
 	private final UserSignContract userSignContract;
 
-	public CreditUiController(
+	public CreditController(
 			CreateProcessService createProcessService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
 			UserTaskSelectBank userTaskSelectBank,
 			UserTaskSubmitApplication userTaskSubmitApplication, UserSignContract userSignContract) {
@@ -65,12 +65,12 @@ public class CreditUiController {
 		model.addAttribute("equity", equity);
 
 		try {
-			String processInstanceId = createProcessService.createProcess();
+			String processInstanceId = createProcessService.createProcess("RealEstateCreditApplication");
 			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
 
 			List<Offer> offers = response.getOffers();
 			model.addAttribute("offers", offers);
-			model.addAttribute("processInstanceId", response.getProcessInstanceId());
+			model.addAttribute("processInstanceId", processInstanceId);
 		} catch (Exception e) {
 
 			model.addAttribute("statusType", "danger");

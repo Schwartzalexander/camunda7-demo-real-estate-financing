@@ -42,7 +42,7 @@ public class UserTaskServiceEnterCreditParameters extends GenericUserTaskService
 		@SuppressWarnings("unchecked")
 		List<Offer> offers = (List<Offer>) offersVar;
 
-		return new EnterCreditParametersResponse(processInstanceId, offers);
+		return new EnterCreditParametersResponse(offers);
 	}
 
 }

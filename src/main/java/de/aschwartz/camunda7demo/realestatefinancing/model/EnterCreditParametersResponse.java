@@ -8,6 +8,5 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class EnterCreditParametersResponse {
-	String processInstanceId;
 	List<Offer> offers;
 }

@@ -11,9 +11,9 @@ public class CreateProcessService {
 		this.runtimeService = runtimeService;
 	}
 
-	public String createProcess() {
+	public String createProcess(String processId) {
 		var pi = runtimeService
-				.createProcessInstanceByKey("RealEstateCreditApplication")
+				.createProcessInstanceByKey(processId)
 				.executeWithVariablesInReturn();
 
 		return pi.getProcessInstanceId();

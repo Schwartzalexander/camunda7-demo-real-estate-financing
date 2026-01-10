@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Real Estate Auto-credit</title>
+    <link rel="stylesheet" th:href="@{/css/credit.css}"/>
+</head>
+<body>
+<div class="page">
+    <header class="header">
+        <div>
+            <h1>Real Estate Auto-credit</h1>
+            <p class="sub">Get a credit contract ready to sign with just one click.</p>
+        </div>
+    </header>
+
+    <main class="card">
+        <section class="form-section">
+            <h2>Input</h2>
+
+            <form class="form" th:action="@{/credit/compare}" method="post">
+                <div class="grid">
+                    <label class="field">
+                        <span>Monthly net income (€)</span>
+                        <input type="number" name="monthlyNetIncome" step="0.01" min="0"
+                               th:value="${monthlyNetIncome}" required/>
+                    </label>
+
+                    <label class="field">
+                        <span>Property value (€)</span>
+                        <input type="number" name="propertyValue" step="0.01" min="0"
+                               th:value="${propertyValue}" required/>
+                    </label>
+
+                    <label class="field">
+                        <span>Equity (€)</span>
+                        <input type="number" name="equity" step="0.01" min="0"
+                               th:value="${equity}" required/>
+                    </label>
+                </div>
+
+                <div class="actions">
+                    <button class="btn primary" type="submit">Compare</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="status" th:if="${statusMessage != null}">
+            <div class="status-box" th:classappend="${statusType}">
+                <span class="status-title" th:text="${statusTitle}">Status</span>
+                <p class="status-text" th:text="${statusMessage}">Message</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <span>Camunda BPM + Spring Boot + Thymeleaf demo</span>
+    </footer>
+</div>
+</body>
+</html>
