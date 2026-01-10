@@ -1,15 +1,15 @@
 package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserSignContract;
 import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSelectBank;
 import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterCreditParameters;
 import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSubmitApplication;
+import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
 import de.aschwartz.camunda7demo.realestatefinancing.model.EnterCreditParametersResponse;
 import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
 import de.aschwartz.camunda7demo.realestatefinancing.model.SelectBankResponse;
 import de.aschwartz.camunda7demo.realestatefinancing.model.SubmitApplicationResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.engine.TaskService;
-import org.camunda.bpm.engine.task.Task;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,20 +25,18 @@ import java.util.List;
 @Slf4j
 public class CreditUiController {
 
-	// Task definition keys in your main process (must match BPMN ids)
-	private static final String TASK_SIGN = "Task_SignContract";
-
-	private final TaskService taskService;
+	private final CreateProcessService createProcessService;
 	private final UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters;
 	private final UserTaskSelectBank userTaskSelectBank;
 	private final UserTaskSubmitApplication userTaskSubmitApplication;
+	private final UserSignContract userSignContract;
 
 	public CreditUiController(
-			TaskService taskService,
-			UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
+			CreateProcessService createProcessService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
 			UserTaskSelectBank userTaskSelectBank,
-			UserTaskSubmitApplication userTaskSubmitApplication) {
-		this.taskService = taskService;
+			UserTaskSubmitApplication userTaskSubmitApplication, UserSignContract userSignContract) {
+		this.createProcessService = createProcessService;
+		this.userSignContract = userSignContract;
 		this.userTaskServiceEnterCreditParameters = userTaskServiceEnterCreditParameters;
 		this.userTaskSelectBank = userTaskSelectBank;
 		this.userTaskSubmitApplication = userTaskSubmitApplication;
@@ -46,7 +44,6 @@ public class CreditUiController {
 
 	@GetMapping
 	public String page(Model model) {
-		// Defaults (optional)
 		Object monthlyNetIncome = model.getAttribute("monthlyNetIncome");
 		model.addAttribute("monthlyNetIncome", monthlyNetIncome != null ? monthlyNetIncome : "2500");
 		Object propertyValue = model.getAttribute("propertyValue");
@@ -68,7 +65,8 @@ public class CreditUiController {
 		model.addAttribute("equity", equity);
 
 		try {
-			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity);
+			String processInstanceId = createProcessService.createProcess();
+			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
 
 			List<Offer> offers = response.getOffers();
 			model.addAttribute("offers", offers);
@@ -106,26 +104,18 @@ public class CreditUiController {
 
 	@PostMapping("/sign")
 	public String sign(@RequestParam String processInstanceId, Model model) {
-		// Find sign task and complete
-		Task signTask = taskService.createTaskQuery()
-				.processInstanceId(processInstanceId)
-				.taskDefinitionKey(TASK_SIGN)
-				.singleResult();
-
-		if (signTask == null) {
+		try {
+			userSignContract.signContract(processInstanceId);
+			model.addAttribute("statusType", "success");
+			model.addAttribute("statusTitle", "Done");
+			model.addAttribute("statusMessage", "Contract signed. Credit contract concluded.");
+			model.addAttribute("showSign", false);
+		} catch (Exception e) {
 			model.addAttribute("statusType", "danger");
 			model.addAttribute("statusTitle", "Not found");
-			model.addAttribute("statusMessage", "No sign task found (process may already be finished).");
+			model.addAttribute("statusMessage", e.getMessage());
 			model.addAttribute("showSign", false);
-			return "credit";
 		}
-
-		taskService.complete(signTask.getId());
-
-		model.addAttribute("statusType", "success");
-		model.addAttribute("statusTitle", "Done");
-		model.addAttribute("statusMessage", "Contract signed. Credit contract concluded.");
-		model.addAttribute("showSign", false);
 
 		return "credit";
 	}

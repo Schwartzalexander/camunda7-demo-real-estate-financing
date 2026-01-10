@@ -22,12 +22,7 @@ public class UserTaskServiceEnterCreditParameters extends GenericUserTaskService
 		super(taskService, runtimeService, historyService);
 	}
 
-	public EnterCreditParametersResponse enterCreditParameters(BigDecimal monthlyNetIncome, BigDecimal propertyValue, BigDecimal equity) {
-		var pi = getRuntimeService()
-				.createProcessInstanceByKey("RealEstateCreditApplication")
-				.executeWithVariablesInReturn();
-
-		String processInstanceId = pi.getProcessInstanceId();
+	public EnterCreditParametersResponse enterCreditParameters(BigDecimal monthlyNetIncome, BigDecimal propertyValue, BigDecimal equity, String processInstanceId) {
 
 		Optional<Task> taskOpt = super.findTask(processInstanceId, "Task_EnterCreditParameters");
 		if (taskOpt.isEmpty()) {
