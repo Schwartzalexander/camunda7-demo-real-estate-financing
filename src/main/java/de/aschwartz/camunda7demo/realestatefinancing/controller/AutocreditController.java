@@ -21,7 +21,9 @@ public class AutocreditController {
 	private final UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters;
 
 	public AutocreditController(
-			CreateProcessService createProcessService, UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters) {
+			CreateProcessService createProcessService,
+			UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters
+	) {
 		this.createProcessService = createProcessService;
 		this.userTaskServiceEnterAutoCreditParameters = userTaskServiceEnterAutoCreditParameters;
 	}
@@ -38,7 +40,7 @@ public class AutocreditController {
 	}
 
 	@PostMapping("/start")
-	public String compare(
+	public String start(
 			@RequestParam BigDecimal monthlyNetIncome,
 			@RequestParam BigDecimal propertyValue,
 			@RequestParam BigDecimal equity,
@@ -53,13 +55,18 @@ public class AutocreditController {
 			userTaskServiceEnterAutoCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
 
 			model.addAttribute("processInstanceId", processInstanceId);
+
+			model.addAttribute("statusType", "success");
+			model.addAttribute("statusTitle", "Success");
+			model.addAttribute("statusMessage", "Process started successfully.");
+
 		} catch (Exception e) {
 			model.addAttribute("statusType", "danger");
-			model.addAttribute("statusTitle", "Info");
+			model.addAttribute("statusTitle", "Error");
 			model.addAttribute("statusMessage", e.getMessage());
 			log.error(e.getMessage(), e);
 		}
+
 		return "autocredit";
 	}
-
 }

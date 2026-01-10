@@ -19,7 +19,7 @@
         <section class="form-section">
             <h2>Input</h2>
 
-            <form class="form" th:action="@{/credit/compare}" method="post">
+            <form class="form" th:action="@{/autocredit/start}" method="post">
                 <div class="grid">
                     <label class="field">
                         <span>Monthly net income (€)</span>
@@ -41,15 +41,21 @@
                 </div>
 
                 <div class="actions">
-                    <button class="btn primary" type="submit">Compare</button>
+                    <button class="btn primary" type="submit">Start</button>
                 </div>
             </form>
         </section>
 
+        <!-- Statusbox: success or danger -->
         <section class="status" th:if="${statusMessage != null}">
             <div class="status-box" th:classappend="${statusType}">
                 <span class="status-title" th:text="${statusTitle}">Status</span>
                 <p class="status-text" th:text="${statusMessage}">Message</p>
+
+                <p class="status-text" th:if="${processInstanceId != null}">
+                    <strong>Process Instance ID:</strong>
+                    <span th:text="${processInstanceId}"></span>
+                </p>
             </div>
         </section>
 
