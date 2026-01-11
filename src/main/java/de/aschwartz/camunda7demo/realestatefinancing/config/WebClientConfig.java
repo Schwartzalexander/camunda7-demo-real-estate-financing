@@ -9,9 +9,17 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+/**
+ * Configuration for a WebClient builder that trusts all SSL certificates.
+ */
 @Configuration
 public class WebClientConfig {
 
+	/**
+	 * Builds a {@link WebClient.Builder} configured with an insecure SSL context.
+	 *
+	 * @return configured WebClient builder
+	 */
 	@Bean
 	public WebClient.Builder webClientBuilder() {
 		try {

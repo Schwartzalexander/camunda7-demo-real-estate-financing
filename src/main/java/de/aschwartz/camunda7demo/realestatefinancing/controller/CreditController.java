@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * MVC controller for the credit comparison flow.
+ */
 @Controller
 @RequestMapping("/credit")
 @Slf4j
@@ -31,6 +34,15 @@ public class CreditController {
 	private final UserTaskSubmitApplication userTaskSubmitApplication;
 	private final UserSignContract userSignContract;
 
+	/**
+	 * Creates the controller with required services.
+	 *
+	 * @param createProcessService process starter service
+	 * @param userTaskServiceEnterCreditParameters service for entering parameters
+	 * @param userTaskSelectBank service for selecting a bank
+	 * @param userTaskSubmitApplication service for submitting the application
+	 * @param userSignContract service for signing the contract
+	 */
 	public CreditController(
 			CreateProcessService createProcessService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
 			UserTaskSelectBank userTaskSelectBank,
@@ -42,6 +54,12 @@ public class CreditController {
 		this.userTaskSubmitApplication = userTaskSubmitApplication;
 	}
 
+	/**
+	 * Renders the credit comparison page with defaults.
+	 *
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@GetMapping
 	public String page(Model model) {
 		Object monthlyNetIncome = model.getAttribute("monthlyNetIncome");
@@ -53,6 +71,15 @@ public class CreditController {
 		return "credit";
 	}
 
+	/**
+	 * Starts the comparison sub-process and fetches offers.
+	 *
+	 * @param monthlyNetIncome monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@PostMapping("/compare")
 	public String compare(
 			@RequestParam BigDecimal monthlyNetIncome,
@@ -82,6 +109,14 @@ public class CreditController {
 		return "credit";
 	}
 
+	/**
+	 * Selects a bank and submits the application.
+	 *
+	 * @param bankName selected bank name
+	 * @param processInstanceId Camunda process instance id
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@PostMapping("/select")
 	public String selectBankAndSubmit(
 			@RequestParam String bankName,
@@ -102,6 +137,13 @@ public class CreditController {
 		return "credit";
 	}
 
+	/**
+	 * Completes the sign-contract user task.
+	 *
+	 * @param processInstanceId Camunda process instance id
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@PostMapping("/sign")
 	public String sign(@RequestParam String processInstanceId, Model model) {
 		try {

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * Simple offer representation for the UI.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

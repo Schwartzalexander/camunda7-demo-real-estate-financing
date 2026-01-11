@@ -15,7 +15,7 @@
     <bpmn:sequenceFlow id="Flow_1pqrgwi" sourceRef="Task_EnterAutoCreditParameters" targetRef="Activity_GetCheapestOffer" />
     <bpmn:serviceTask id="Activity_GetCheapestOffer" name="Get cheapest offer" camunda:asyncBefore="true" camunda:delegateExpression="${getCheapestOfferDelegate}">
       <bpmn:extensionElements>
-        <camunda:failedJobRetryTimeCycle>R3/PT1S</camunda:failedJobRetryTimeCycle>
+        <camunda:failedJobRetryTimeCycle>R10/PT1M</camunda:failedJobRetryTimeCycle>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1pqrgwi</bpmn:incoming>
       <bpmn:outgoing>Flow_14ul2yb</bpmn:outgoing>

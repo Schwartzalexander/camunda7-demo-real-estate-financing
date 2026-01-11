@@ -11,14 +11,32 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+/**
+ * User-task handler for entering parameters in the auto-credit flow.
+ */
 @Service
 @Slf4j
 public class UserTaskServiceEnterAutoCreditParameters extends GenericUserTaskService {
 
+	/**
+	 * Creates the service.
+	 *
+	 * @param taskService task service
+	 * @param runtimeService runtime service
+	 * @param historyService history service
+	 */
 	public UserTaskServiceEnterAutoCreditParameters(TaskService taskService, RuntimeService runtimeService, HistoryService historyService) {
 		super(taskService, runtimeService, historyService);
 	}
 
+	/**
+	 * Completes the auto-credit parameter task.
+	 *
+	 * @param monthlyNetIncome monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @param processInstanceId Camunda process instance id
+	 */
 	public void enterCreditParameters(BigDecimal monthlyNetIncome, BigDecimal propertyValue, BigDecimal equity, String processInstanceId) {
 
 		Optional<Task> taskOpt = super.findTask(processInstanceId, "Task_EnterAutoCreditParameters");

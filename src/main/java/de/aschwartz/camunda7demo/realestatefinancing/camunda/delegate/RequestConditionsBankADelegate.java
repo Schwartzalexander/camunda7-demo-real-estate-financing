@@ -8,9 +8,17 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Calculates interest rates for Bank A.
+ */
 @Component("requestConditionsBankADelegate")
 @Slf4j
 public class RequestConditionsBankADelegate implements JavaDelegate {
+	/**
+	 * Executes the delegate and sets the calculated interest rate.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 		BigDecimal monthlyNetIncome = (BigDecimal) execution.getVariable("monthlyNetIncome");
@@ -24,6 +32,14 @@ public class RequestConditionsBankADelegate implements JavaDelegate {
 		execution.setVariable("interestRateA", interestRate);
 	}
 
+	/**
+	 * Calculates an interest rate based on income and equity ratio.
+	 *
+	 * @param income monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @return interest rate
+	 */
 	private BigDecimal calculateInterestRate(
 			BigDecimal income,
 			BigDecimal propertyValue,

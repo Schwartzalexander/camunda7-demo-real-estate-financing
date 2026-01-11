@@ -12,6 +12,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Response payload for the external offers API.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +27,9 @@ public class OffersResponse implements Serializable {
 
 	private List<Angebot> angebote;
 
+	/**
+	 * Single offer entry.
+	 */
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
@@ -41,6 +47,9 @@ public class OffersResponse implements Serializable {
 
 		private String actionUrl;
 
+		/**
+		 * Offer terms.
+		 */
 		@Data
 		@NoArgsConstructor
 		@AllArgsConstructor
@@ -69,6 +78,9 @@ public class OffersResponse implements Serializable {
 			private BigDecimal grundbuchkosten;
 		}
 
+		/**
+		 * Provider information.
+		 */
 		@Data
 		@NoArgsConstructor
 		@AllArgsConstructor
@@ -101,6 +113,9 @@ public class OffersResponse implements Serializable {
 			private String leadId;
 			private String leadmanagementId;
 
+			/**
+			 * Provider address.
+			 */
 			@Data
 			@NoArgsConstructor
 			@AllArgsConstructor
@@ -116,6 +131,9 @@ public class OffersResponse implements Serializable {
 			}
 		}
 
+		/**
+		 * Product information metadata.
+		 */
 		@Data
 		@NoArgsConstructor
 		@AllArgsConstructor
@@ -138,6 +156,12 @@ public class OffersResponse implements Serializable {
 		}
 
 		// --------- Optional: JSON serialize/deserialize helper ----------
+		/**
+		 * Serializes this offer to JSON.
+		 *
+		 * @param mapper object mapper
+		 * @return JSON string
+		 */
 		public String toJson(ObjectMapper mapper) {
 			try {
 				return mapper.writeValueAsString(this);
@@ -146,6 +170,13 @@ public class OffersResponse implements Serializable {
 			}
 		}
 
+		/**
+		 * Deserializes a single offer from JSON.
+		 *
+		 * @param mapper object mapper
+		 * @param json JSON payload
+		 * @return deserialized offer
+		 */
 		public static Angebot fromJson(ObjectMapper mapper, String json) {
 			try {
 				return mapper.readValue(json, Angebot.class);
@@ -155,7 +186,13 @@ public class OffersResponse implements Serializable {
 		}
 	}
 
-	// JSON helpers für die ganze Response
+	// JSON helpers for the full response.
+	/**
+	 * Serializes this response to JSON.
+	 *
+	 * @param mapper object mapper
+	 * @return JSON string
+	 */
 	public String toJson(ObjectMapper mapper) {
 		try {
 			return mapper.writeValueAsString(this);
@@ -164,6 +201,13 @@ public class OffersResponse implements Serializable {
 		}
 	}
 
+	/**
+	 * Deserializes a response from JSON.
+	 *
+	 * @param mapper object mapper
+	 * @param json JSON payload
+	 * @return deserialized response
+	 */
 	public static OffersResponse fromJson(ObjectMapper mapper, String json) {
 		try {
 			return mapper.readValue(json, OffersResponse.class);

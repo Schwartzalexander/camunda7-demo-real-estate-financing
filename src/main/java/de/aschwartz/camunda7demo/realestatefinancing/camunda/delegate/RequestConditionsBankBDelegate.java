@@ -9,12 +9,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
 
+/**
+ * Calculates interest rates for Bank B with a small random component.
+ */
 @Component("requestConditionsBankBDelegate")
 @Slf4j
 public class RequestConditionsBankBDelegate implements JavaDelegate {
 
-	Random random = new Random();
+	private final Random random = new Random();
 
+	/**
+	 * Executes the delegate and sets the calculated interest rate.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 		BigDecimal monthlyNetIncome = (BigDecimal) execution.getVariable("monthlyNetIncome");
@@ -28,6 +36,14 @@ public class RequestConditionsBankBDelegate implements JavaDelegate {
 		execution.setVariable("interestRateB", interestRate);
 	}
 
+	/**
+	 * Calculates an interest rate based on income and equity ratio.
+	 *
+	 * @param income monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @return interest rate
+	 */
 	private BigDecimal calculateInterestRate(
 			BigDecimal income,
 			BigDecimal propertyValue,

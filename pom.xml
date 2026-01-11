@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.6</version>
+		<version>3.5.3</version>
 		<relativePath/>
 	</parent>
 
 	<groupId>de.aSchwartz.camunda7demo</groupId>
 	<artifactId>real-estate-financing</artifactId>
-	<version>0.0.1</version>
+	<version>1.0.0</version>
 	<name>real-estate-financing</name>
 
 	<properties>
@@ -59,17 +59,10 @@
 			<scope>provided</scope>
 		</dependency>
 
-
 		<!-- WebClient -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
-
-		<!-- Jackson (meist schon über Boot dabei, aber harmless explizit) -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- LocalDate / Java Time Support -->

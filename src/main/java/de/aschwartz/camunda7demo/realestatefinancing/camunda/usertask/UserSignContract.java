@@ -9,14 +9,29 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * User-task handler for signing the credit contract.
+ */
 @Service
 @Slf4j
 public class UserSignContract extends GenericUserTaskService {
 
+	/**
+	 * Creates the service.
+	 *
+	 * @param taskService task service
+	 * @param runtimeService runtime service
+	 * @param historyService history service
+	 */
 	public UserSignContract(TaskService taskService, RuntimeService runtimeService, HistoryService historyService) {
 		super(taskService, runtimeService, historyService);
 	}
 
+	/**
+	 * Completes the sign-contract user task.
+	 *
+	 * @param processInstanceId Camunda process instance id
+	 */
 	public void signContract(String processInstanceId) {
 		Optional<Task> taskOpt = super.findTask(processInstanceId, "Task_SignContract");
 		if (taskOpt.isEmpty()) {
