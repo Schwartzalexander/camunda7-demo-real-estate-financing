@@ -15,6 +15,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 
+/**
+ * Retrieves the cheapest offer from an external auto-credit API.
+ */
 @Component("getCheapestOfferDelegate")
 @Slf4j
 public class GetCheapestOfferDelegate implements JavaDelegate {
@@ -23,6 +26,13 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 	private final String baseUrl;
 	private final String apiPath;
 
+	/**
+	 * Creates the delegate with the configured API base URL and path.
+	 *
+	 * @param webClientBuilder web client builder
+	 * @param baseUrl base URL for the API
+	 * @param apiPath API path for offers
+	 */
 	public GetCheapestOfferDelegate(
 			WebClient.Builder webClientBuilder,
 			@Value("${camunda7demo.auto-credit.base-url}") String baseUrl,
@@ -32,6 +42,11 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 		this.apiPath = apiPath;
 	}
 
+	/**
+	 * Calls the external API and stores the cheapest offer as a process variable.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
@@ -57,7 +72,7 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 						.build())
 				.build();
 
-		OffersResponse response = null;
+		OffersResponse response;
 		try {
 			response = webClient
 					.post()

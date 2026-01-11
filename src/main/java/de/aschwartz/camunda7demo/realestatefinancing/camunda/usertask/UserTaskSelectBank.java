@@ -12,14 +12,31 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+/**
+ * User-task handler for selecting a bank.
+ */
 @Service
 @Slf4j
 public class UserTaskSelectBank extends GenericUserTaskService {
 
+	/**
+	 * Creates the service.
+	 *
+	 * @param taskService task service
+	 * @param runtimeService runtime service
+	 * @param historyService history service
+	 */
 	public UserTaskSelectBank(TaskService taskService, RuntimeService runtimeService, HistoryService historyService) {
 		super(taskService, runtimeService, historyService);
 	}
 
+	/**
+	 * Completes the bank selection user task.
+	 *
+	 * @param bankName selected bank name
+	 * @param processInstanceId Camunda process instance id
+	 * @return response echoing key values
+	 */
 	public SelectBankResponse selectBank(String bankName, String processInstanceId) {
 		Optional<Task> taskOpt = super.findTask(processInstanceId, "Task_BankSelection");
 		if (taskOpt.isEmpty()) {

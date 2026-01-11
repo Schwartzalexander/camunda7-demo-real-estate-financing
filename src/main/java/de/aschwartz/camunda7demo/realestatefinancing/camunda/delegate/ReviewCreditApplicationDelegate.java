@@ -12,10 +12,18 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Reviews a selected offer and sets acceptance decision variables.
+ */
 @Component("reviewCreditApplicationDelegate")
 @Slf4j
 public class ReviewCreditApplicationDelegate implements JavaDelegate {
 
+	/**
+	 * Executes the credit application review.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
@@ -37,6 +45,15 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 		execution.setVariable("rejectionReason", result.getRejectionReason());
 	}
 
+	/**
+	 * Applies basic validation and scoring to determine acceptance.
+	 *
+	 * @param monthlyNetIncome monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @param selectedOffer selected offer
+	 * @return review result
+	 */
 	private ReviewResult reviewApplication(
 			BigDecimal monthlyNetIncome,
 			BigDecimal propertyValue,
@@ -113,6 +130,12 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 		return ReviewResult.rejected("Score too low (risk too high)");
 	}
 
+	/**
+	 * Generates a contract number using the bank name and a random suffix.
+	 *
+	 * @param bankName bank name
+	 * @return generated contract number
+	 */
 	private String generateContractNumber(String bankName) {
 		String bankCode = bankName == null
 				? "BANK"

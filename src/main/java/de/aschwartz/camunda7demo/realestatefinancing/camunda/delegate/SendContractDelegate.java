@@ -5,10 +5,18 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Simulates sending a contract to the client.
+ */
 @Component("sendContractDelegate")
 @Slf4j
 public class SendContractDelegate implements JavaDelegate {
 
+	/**
+	 * Logs the contract send action.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 		String processInstanceId = execution.getProcessInstanceId();

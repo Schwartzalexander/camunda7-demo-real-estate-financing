@@ -21,16 +21,29 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Creates a simple PDF contract based on the cheapest offer.
+ */
 @Component("createContractPdfDelegate")
 @Slf4j
 public class CreateContractPDFDelegate implements JavaDelegate {
 
 	private final Path pdfDir;
 
+	/**
+	 * Creates the delegate with the configured PDF output directory.
+	 *
+	 * @param pdfPath output directory for generated PDFs
+	 */
 	public CreateContractPDFDelegate(@Value("${camunda7demo.pdf-path}") String pdfPath) {
 		this.pdfDir = Path.of(pdfPath);
 	}
 
+	/**
+	 * Generates a PDF contract for the cheapest offer and stores it on disk.
+	 *
+	 * @param execution Camunda delegate execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
@@ -90,12 +103,12 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 				}
 				y = drawKeyValue(cs, margin, y, "Adresse", bankStr + ", " + bankPlz.trim() + " " + bankOrt);
 
-				// Konditionen
+				// Terms
 				y -= 14;
 				y = drawSectionHeader(cs, margin, y, "Konditionen");
 				y -= 10;
 
-				// draw as a neat 2-column list
+				// Draw as a neat 2-column list.
 				y = drawKeyValue(cs, margin, y, "Sollzins (%)", fmt(kond != null ? kond.getSollZins() : null, df2));
 				y = drawKeyValue(cs, margin, y, "Effektivzins (%)", fmt(kond != null ? kond.getEffektivZins() : null, df2));
 				y = drawKeyValue(cs, margin, y, "Monatliche Rate (€)", fmt(kond != null ? kond.getMonatlicheRate() : null, df2));
@@ -131,7 +144,7 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 			doc.save(target.toFile());
 			log.info("Contract PDF created at: {}", target);
 
-			// optional: Pfad als Prozessvariable ablegen
+			// Optional: store the path as a process variable.
 			execution.setVariable("contractPdfPath", target.toString());
 
 		} catch (IOException e) {
@@ -141,6 +154,17 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 
 	// --------- Drawing helpers (simple + robust) ---------
 
+	/**
+	 * Draws the document title and subtitle.
+	 *
+	 * @param cs content stream
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param title title text
+	 * @param subtitle subtitle text
+	 * @return new y-coordinate after drawing
+	 * @throws IOException when writing fails
+	 */
 	private static float drawTitle(PDPageContentStream cs, float x, float y, String title, String subtitle) throws IOException {
 		cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 20);
 		writeLine(cs, x, y, title);
@@ -150,6 +174,16 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 		return y;
 	}
 
+	/**
+	 * Draws a section header with underline.
+	 *
+	 * @param cs content stream
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param text header text
+	 * @return new y-coordinate after drawing
+	 * @throws IOException when writing fails
+	 */
 	private static float drawSectionHeader(PDPageContentStream cs, float x, float y, String text) throws IOException {
 		cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 13);
 		writeLine(cs, x, y, text);
@@ -158,6 +192,17 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 		return y - 2;
 	}
 
+	/**
+	 * Draws a key/value line.
+	 *
+	 * @param cs content stream
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param key label
+	 * @param value value text
+	 * @return new y-coordinate after drawing
+	 * @throws IOException when writing fails
+	 */
 	private static float drawKeyValue(PDPageContentStream cs, float x, float y, String key, String value) throws IOException {
 		float keyWidth = 170f;
 		cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 10.5f);
@@ -167,6 +212,15 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 		return y - 14;
 	}
 
+	/**
+	 * Writes a line of text.
+	 *
+	 * @param cs content stream
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param text text to draw
+	 * @throws IOException when writing fails
+	 */
 	private static void writeLine(PDPageContentStream cs, float x, float y, String text) throws IOException {
 		cs.beginText();
 		cs.newLineAtOffset(x, y);
@@ -174,20 +228,51 @@ public class CreateContractPDFDelegate implements JavaDelegate {
 		cs.endText();
 	}
 
+	/**
+	 * Draws a straight line.
+	 *
+	 * @param cs content stream
+	 * @param x1 start x
+	 * @param y1 start y
+	 * @param x2 end x
+	 * @param y2 end y
+	 * @throws IOException when drawing fails
+	 */
 	private static void drawLine(PDPageContentStream cs, float x1, float y1, float x2, float y2) throws IOException {
 		cs.moveTo(x1, y1);
 		cs.lineTo(x2, y2);
 		cs.stroke();
 	}
 
+	/**
+	 * Returns a fallback string if the input is null or blank.
+	 *
+	 * @param s input string
+	 * @param fallback fallback value
+	 * @return input or fallback
+	 */
 	private static String nvl(String s, String fallback) {
 		return (s == null || s.isBlank()) ? fallback : s;
 	}
 
+	/**
+	 * Returns a fallback string if the input is null.
+	 *
+	 * @param i input integer
+	 * @param fallback fallback value
+	 * @return string representation or fallback
+	 */
 	private static String nvl(Integer i, String fallback) {
 		return (i == null) ? fallback : String.valueOf(i);
 	}
 
+	/**
+	 * Formats the given value with the provided decimal formatter.
+	 *
+	 * @param v value to format
+	 * @param df decimal formatter
+	 * @return formatted value or an em dash when null
+	 */
 	private static String fmt(BigDecimal v, DecimalFormat df) {
 		return (v == null) ? "—" : df.format(v);
 	}

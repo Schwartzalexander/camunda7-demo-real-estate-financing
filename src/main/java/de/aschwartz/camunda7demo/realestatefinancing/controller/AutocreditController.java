@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 
+/**
+ * MVC controller for the auto-credit flow.
+ */
 @Controller
 @RequestMapping("/autocredit")
 @Slf4j
@@ -20,6 +23,12 @@ public class AutocreditController {
 	private final CreateProcessService createProcessService;
 	private final UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters;
 
+	/**
+	 * Creates the controller with required services.
+	 *
+	 * @param createProcessService process starter service
+	 * @param userTaskServiceEnterAutoCreditParameters service for entering parameters
+	 */
 	public AutocreditController(
 			CreateProcessService createProcessService,
 			UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters
@@ -28,6 +37,12 @@ public class AutocreditController {
 		this.userTaskServiceEnterAutoCreditParameters = userTaskServiceEnterAutoCreditParameters;
 	}
 
+	/**
+	 * Renders the auto-credit page with defaults.
+	 *
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@GetMapping
 	public String page(Model model) {
 		Object monthlyNetIncome = model.getAttribute("monthlyNetIncome");
@@ -39,6 +54,15 @@ public class AutocreditController {
 		return "autocredit";
 	}
 
+	/**
+	 * Starts the auto-credit process.
+	 *
+	 * @param monthlyNetIncome monthly net income
+	 * @param propertyValue property value
+	 * @param equity equity amount
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
 	@PostMapping("/start")
 	public String start(
 			@RequestParam BigDecimal monthlyNetIncome,

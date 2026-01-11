@@ -10,14 +10,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * User-task handler for submitting a credit application.
+ */
 @Service
 @Slf4j
 public class UserTaskSubmitApplication extends GenericUserTaskService {
 
+	/**
+	 * Creates the service.
+	 *
+	 * @param taskService task service
+	 * @param runtimeService runtime service
+	 * @param historyService history service
+	 */
 	public UserTaskSubmitApplication(TaskService taskService, RuntimeService runtimeService, HistoryService historyService) {
 		super(taskService, runtimeService, historyService);
 	}
 
+	/**
+	 * Completes the submit-application task and reads decision variables.
+	 *
+	 * @param processInstanceId Camunda process instance id
+	 * @return review response
+	 */
 	public SubmitApplicationResponse submitApplication(String processInstanceId) {
 		Optional<Task> taskOpt = super.findTask(processInstanceId, "Task_SubmitApplication");
 		if (taskOpt.isEmpty()) {

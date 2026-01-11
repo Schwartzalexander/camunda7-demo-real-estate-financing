@@ -12,6 +12,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Request payload for the external offers API.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,6 +29,9 @@ public class OffersRequest implements Serializable {
 	private Immobilie immobilie;
 	private Finanzierung finanzierung;
 
+	/**
+	 * Customer information payload.
+	 */
 	@Data
 	@Builder
 	@NoArgsConstructor
@@ -35,11 +41,14 @@ public class OffersRequest implements Serializable {
 		@Serial
 		private static final long serialVersionUID = 1L;
 
-		// im Beispiel: "ANGESTELLTER"
+		// Example value: "ANGESTELLTER".
 		@JsonProperty("anstellungsVerhaeltnis")
 		private String anstellungsVerhaeltnis;
 	}
 
+	/**
+	 * Property information payload.
+	 */
 	@Data
 	@Builder
 	@NoArgsConstructor
@@ -49,11 +58,14 @@ public class OffersRequest implements Serializable {
 		@Serial
 		private static final long serialVersionUID = 1L;
 
-		// im Beispiel int; wir nehmen BigDecimal, Jackson schreibt dann Zahl
+		// Example uses int; we use BigDecimal to preserve scale in JSON.
 		private BigDecimal kaufPreis;
 		private String postleitzahl;
 	}
 
+	/**
+	 * Financing information payload.
+	 */
 	@Data
 	@Builder
 	@NoArgsConstructor
