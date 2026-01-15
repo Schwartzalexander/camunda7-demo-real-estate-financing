@@ -3,16 +3,18 @@
 ## Overview
 
 This repository contains a Spring Boot + Camunda 7 demo that showcases a real estate financing journey. The demo
-includes two flows:
+includes three flows:
 
 - **Credit comparison**: a user enters financing parameters, compares offers from multiple banks, selects one, submits
   an application, and signs the contract.
 - **Auto-credit**: a streamlined flow that fetches the cheapest external offer and generates a ready-to-sign PDF
   contract.
+- **DMN-credit**: a DMN-driven credit assessment flow that checks credibility and creates a contract PDF when approved.
 
 ## Features
 
-- Camunda 7 BPMN processes for credit comparison and auto-credit.
+- Camunda 7 BPMN processes for credit comparison, auto-credit, and DMN-credit.
+- DMN-based credibility decisioning for the DMN-credit flow.
 - Thymeleaf UI for entering parameters and interacting with user tasks.
 - External offer lookup for the auto-credit flow.
 - PDF generation for the auto-credit contract.
@@ -56,6 +58,13 @@ The BPMN models are located in `src/main/resources/processes/`:
     - Service task retrieves the cheapest external offer.
     - Service task creates a PDF contract.
     - Ends with a concluded contract.
+
+- **DMN-credit** (`src/main/resources/processes/dmncredit/dmncredit.bpmn`)
+    - User enters parameters.
+    - Business rule task evaluates a DMN decision for credit credibility.
+    - Exclusive gateway routes to approval or rejection.
+    - On approval, a contract PDF is created and the process ends as concluded.
+    - On rejection, the process ends without a contract.
 
 ## UI templates and assets
 
