@@ -32,6 +32,7 @@ Once the application is running:
 
 - Credit comparison UI: http://localhost:8080/credit
 - Auto-credit UI: http://localhost:8080/autocredit
+- DMN-credit UI: http://localhost:8080/dmncredit
 
 ## Process diagrams (BPMN)
 
@@ -62,6 +63,7 @@ Thymeleaf templates and static assets live under `src/main/resources/`:
 
 - Credit comparison UI: `src/main/resources/templates/credit.html`
 - Auto-credit UI: `src/main/resources/templates/autocredit.html`
+- DMN-credit UI: `src/main/resources/templates/dmncredit.html`
 - Shared styling: `src/main/resources/static/css/credit.css`
 
 ## Configuration
