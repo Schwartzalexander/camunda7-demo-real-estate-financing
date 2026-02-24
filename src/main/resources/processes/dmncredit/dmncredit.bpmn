@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_MaDn_Game" targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler" exporterVersion="5.42.0">
   <bpmn:process id="RealEstateDmnCredit" name="Real estate DMN credit" isExecutable="true">
-    <bpmn:extensionElements>
-      <camunda:executionListener class="de.aschwartz.camunda7demo.realestatefinancing.camunda.executionlistener.LogDecline" event="start" />
-    </bpmn:extensionElements>
+    <bpmn:extensionElements />
     <bpmn:startEvent id="StartEvent_CreditApplication" name="User starts credit application">
       <bpmn:outgoing>Flow_1ta8xbz</bpmn:outgoing>
     </bpmn:startEvent>
@@ -38,6 +36,9 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_1k1tpii" name="No contract">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="de.aschwartz.camunda7demo.realestatefinancing.camunda.executionlistener.LogDecline" event="start" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_0mx3jhm</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0mx3jhm" name="No" sourceRef="Gateway_0j7bs3o" targetRef="Event_1k1tpii">
